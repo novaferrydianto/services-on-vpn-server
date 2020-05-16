@@ -1,0 +1,29 @@
+image: docker:latest
+
+stages:
+  - build
+  - deploy
+
+#############
+#  MASTER   #
+#############
+
+build-master-fdc:
+  stage: build
+  script:
+    - sudo docker login --username "$REPOSITORY_USER" --password "$REPOSITORY_PASSWORD" "$REPOSITORY_URL"
+    - sudo docker build -t "$REPOSITORY_URL:PROD_$CI_PIPELINE_ID" .
+    - sudo docker push "$REPOSITORY_URL:PROD_$CI_PIPELINE_ID"
+  only:
+    - master
+  tags:
+    - mekar-fdc-master
+    
+deploy-master-fdc:
+  stage: deploy
+  script:
+    - ~/deployment/deploy-fdc-access.sh "PROD_$CI_PIPELINE_ID"
+  only:
+    - master
+  tags:
+    - mekar-fdc-master
